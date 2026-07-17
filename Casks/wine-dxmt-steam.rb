@@ -10,7 +10,7 @@ cask "wine-dxmt-steam" do
   homepage "https://github.com/zzzz465/homebrew-wine-dxmt"
 
   depends_on cask: "wine-dxmt"
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   preflight do
     ohai "Ensuring wine-dxmt is up to date..."
