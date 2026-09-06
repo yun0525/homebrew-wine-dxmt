@@ -13,7 +13,7 @@ cask "wine-dxmt-steam" do
   depends_on macos: :ventura
 
   preflight_steps do
-    ohai "Ensuring wine-dxmt is up to date..."
+    puts "Ensuring wine-dxmt is up to date..."
     system_command "/opt/homebrew/bin/brew",
       args: ["upgrade", "--cask", "wine-dxmt"],
       print_stdout: true,
@@ -32,11 +32,11 @@ cask "wine-dxmt-steam" do
     existing = ENV["WINE_DXMT_PREFIX"] && File.exist?("#{prefix}/system.reg")
 
     if existing
-      ohai "Using existing prefix: #{prefix}"
+      puts "Using existing prefix: #{prefix}"
     else
       # --- 1. Create Wine prefix ---
       unless File.exist?("#{prefix}/system.reg")
-        ohai "Creating Wine prefix at #{prefix}..."
+        puts "Creating Wine prefix at #{prefix}..."
         system "/bin/mkdir", "-p", prefix
         system "WINEPREFIX=#{prefix} #{wine_dxmt} wineboot --init 2>/dev/null"
       end
@@ -49,8 +49,8 @@ cask "wine-dxmt-steam" do
     # --- 3. Install Steam in background (skip if existing prefix with Steam) ---
     steam_exe = "#{prefix}/drive_c/Program Files (x86)/Steam/steam.exe"
     unless File.exist?(steam_exe)
-      ohai "Starting Steam installation in background..."
-      ohai "Progress: tail -f #{config_dir}/steam-install.log"
+      puts "Starting Steam installation in background..."
+      puts "Progress: tail -f #{config_dir}/steam-install.log"
       system "/bin/bash", "-c", <<~BG
         (
           LOCK="#{config_dir}/steam-installing.lock"
@@ -68,7 +68,7 @@ cask "wine-dxmt-steam" do
         ) &
       BG
     else
-      ohai "Steam already installed in prefix, skipping."
+      puts "Steam already installed in prefix, skipping."
     end
 
     # --- 4. Create wine-dxmt-steam launcher ---

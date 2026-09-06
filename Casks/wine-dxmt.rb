@@ -12,21 +12,21 @@ cask "wine-dxmt" do
   preflight_steps do
     # --- Ensure Xcode CLI Tools are installed (needed for codesign) ---
     unless system_command("/usr/bin/xcode-select", args: ["-p"], print_stderr: false).exit_status.zero?
-      ohai "Installing Xcode Command Line Tools..."
+      puts "Installing Xcode Command Line Tools..."
       system_command "/usr/bin/xcode-select", args: ["--install"]
-      ohai "Please complete the Xcode CLI Tools installation, then re-run: brew install --cask wine-dxmt"
+      puts "Please complete the Xcode CLI Tools installation, then re-run: brew install --cask wine-dxmt"
       raise "Xcode Command Line Tools required. Please install and retry."
     end
 
     # --- Ensure Rosetta 2 is installed (needed for x86_64 Wine) ---
     unless system_command("/usr/bin/arch", args: ["-x86_64", "/usr/bin/true"], print_stderr: false).exit_status.zero?
-      ohai "Installing Rosetta 2..."
+      puts "Installing Rosetta 2..."
       system_command "/usr/sbin/softwareupdate", args: ["--install-rosetta", "--agree-to-license"]
     end
 
     # --- Ensure x86_64 Homebrew is installed (needed for GStreamer) ---
     unless File.exist?("/usr/local/bin/brew")
-      ohai "Installing x86_64 Homebrew..."
+      puts "Installing x86_64 Homebrew..."
       system_command "/usr/bin/arch", args: [
         "-x86_64", "/bin/bash", "-c",
         'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
@@ -43,7 +43,7 @@ cask "wine-dxmt" do
     #        winemac resize fix). Built from zzzz465/macports-wine fork; tarball
     #        layout matches Gcenx's Wine Staging.app/Contents/Resources/wine/. ---
     unless File.exist?("#{wine_dir}/bin/wine")
-      ohai "Installing Wine Staging 11.8_mm1..."
+      puts "Installing Wine Staging 11.8_mm1..."
       system "/bin/mkdir", "-p", wine_dir
       system "/bin/cp", "-R",
         "#{staged_path}/Wine Staging.app/Contents/Resources/wine/",
@@ -54,7 +54,7 @@ cask "wine-dxmt" do
     # Our v0.80 build (step 3) overwrites all 64-bit DXMT files. This step
     # contributes i386-windows/* (32-bit DXMT) and x86_64-windows/nv{api64,ngx}.dll
     # (NVIDIA stubs).
-    ohai "Downloading DXMT v0.80 prebuilt..."
+    puts "Downloading DXMT v0.80 prebuilt..."
     system "/usr/bin/curl", "-sLo", "/tmp/dxmt-v0.80-builtin.tar.gz",
       "https://github.com/3Shain/dxmt/releases/download/v0.80/dxmt-v0.80-builtin.tar.gz"
     system "/usr/bin/tar", "-xzf", "/tmp/dxmt-v0.80-builtin.tar.gz", "-C", "/tmp"
@@ -73,7 +73,7 @@ cask "wine-dxmt" do
     #   - src/d3d11/d3d11_context_imm.cpp: TIMESTAMP_DISJOINT hr=S_OK
     #   - src/d3d11/d3d11_query.hpp: Undefined→Signaled
     #   - src/winemetal/unix/winemetal_unix.c: frame sync fix in _MetalLayer_setProps
-    ohai "Applying DXMT v0.80 UE5.6-patched binaries..."
+    puts "Applying DXMT v0.80 UE5.6-patched binaries..."
     dxmt_patches_dir = "#{tap_dir}/patches/dxmt-v0.80-patches"
     %w[x86_64-unix x86_64-windows].each do |arch|
       Dir.glob("#{dxmt_patches_dir}/#{arch}/*").each do |f|
@@ -103,7 +103,7 @@ cask "wine-dxmt" do
 
     # --- 5. x86_64 GStreamer ---
     unless File.exist?("/usr/local/lib/gstreamer-1.0")
-      ohai "Installing x86_64 GStreamer..."
+      puts "Installing x86_64 GStreamer..."
       system "arch", "-x86_64", "/usr/local/bin/brew", "install", "gstreamer"
     end
 
