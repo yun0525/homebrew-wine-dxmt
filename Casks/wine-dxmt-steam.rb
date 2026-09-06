@@ -12,15 +12,7 @@ cask "wine-dxmt-steam" do
   depends_on cask: "wine-dxmt"
   depends_on macos: :ventura
 
-  preflight_steps do
-    ::Kernel.puts "Ensuring wine-dxmt is up to date..."
-    system_command "/opt/homebrew/bin/brew",
-      args: ["upgrade", "--cask", "wine-dxmt"],
-      print_stdout: true,
-      print_stderr: true
-  end
-
-  postflight_steps do
+  postflight do
     # Resolve active wine-dxmt install dir via /usr/local/bin/wine-dxmt symlink
     # (wine-dxmt cask keeps its binaries under ~/Wine/dxmt/<staging-version>/).
     wine_dxmt = "/usr/local/bin/wine-dxmt"
@@ -32,11 +24,11 @@ cask "wine-dxmt-steam" do
     existing = ENV["WINE_DXMT_PREFIX"] && File.exist?("#{prefix}/system.reg")
 
     if existing
-      ::Kernel.puts "Using existing prefix: #{prefix}"
+      ohai "Using existing prefix: #{prefix}"
     else
       # --- 1. Create Wine prefix ---
       unless File.exist?("#{prefix}/system.reg")
-        ::Kernel.puts "Creating Wine prefix at #{prefix}..."
+        ohai "Creating Wine prefix at #{prefix}..."
         system "/bin/mkdir", "-p", prefix
         system "WINEPREFIX=#{prefix} #{wine_dxmt} wineboot --init 2>/dev/null"
       end
@@ -49,8 +41,8 @@ cask "wine-dxmt-steam" do
     # --- 3. Install Steam in background (skip if existing prefix with Steam) ---
     steam_exe = "#{prefix}/drive_c/Program Files (x86)/Steam/steam.exe"
     unless File.exist?(steam_exe)
-      ::Kernel.puts "Starting Steam installation in background..."
-      ::Kernel.puts "Progress: tail -f #{config_dir}/steam-install.log"
+      ohai "Starting Steam installation in background..."
+      ohai "Progress: tail -f #{config_dir}/steam-install.log"
       system "/bin/bash", "-c", <<~BG
         (
           LOCK="#{config_dir}/steam-installing.lock"
@@ -68,7 +60,7 @@ cask "wine-dxmt-steam" do
         ) &
       BG
     else
-      ::Kernel.puts "Steam already installed in prefix, skipping."
+      ohai "Steam already installed in prefix, skipping."
     end
 
     # --- 4. Create wine-dxmt-steam launcher ---
