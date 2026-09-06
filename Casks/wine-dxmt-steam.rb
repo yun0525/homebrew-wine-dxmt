@@ -12,7 +12,7 @@ cask "wine-dxmt-steam" do
   depends_on cask: "wine-dxmt"
   depends_on macos: :ventura
 
-  preflight do
+  preflight_steps do
     ohai "Ensuring wine-dxmt is up to date..."
     system_command "/opt/homebrew/bin/brew",
       args: ["upgrade", "--cask", "wine-dxmt"],
@@ -20,7 +20,7 @@ cask "wine-dxmt-steam" do
       print_stderr: true
   end
 
-  postflight do
+  postflight_steps do
     # Resolve active wine-dxmt install dir via /usr/local/bin/wine-dxmt symlink
     # (wine-dxmt cask keeps its binaries under ~/Wine/dxmt/<staging-version>/).
     wine_dxmt = "/usr/local/bin/wine-dxmt"

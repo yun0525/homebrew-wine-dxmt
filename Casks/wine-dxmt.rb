@@ -9,7 +9,7 @@ cask "wine-dxmt" do
 
   depends_on macos: :ventura
 
-  preflight do
+  preflight_steps do
     # --- Ensure Xcode CLI Tools are installed (needed for codesign) ---
     unless system_command("/usr/bin/xcode-select", args: ["-p"], print_stderr: false).exit_status.zero?
       ohai "Installing Xcode Command Line Tools..."
@@ -34,7 +34,7 @@ cask "wine-dxmt" do
     end
   end
 
-  postflight do
+  postflight_steps do
     wine_dir = "#{ENV["HOME"]}/Wine/dxmt"
     config_dir = "#{ENV["HOME"]}/.config/wine-dxmt"
     tap_dir = File.expand_path("..", __dir__)
